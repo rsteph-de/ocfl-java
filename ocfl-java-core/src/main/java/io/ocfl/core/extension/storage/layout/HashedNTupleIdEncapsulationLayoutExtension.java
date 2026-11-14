@@ -29,7 +29,7 @@ import io.ocfl.api.util.Enforce;
 import io.ocfl.core.extension.OcflExtensionConfig;
 import io.ocfl.core.extension.storage.layout.config.HashedNTupleIdEncapsulationLayoutConfig;
 import io.ocfl.core.util.DigestUtil;
-import io.ocfl.core.util.PercentEscaper;
+import io.ocfl.core.util.escape.PercentEscaper;
 
 /**
  * Implementation of the <a href="https://ocfl.github.io/extensions/0003-hash-and-id-n-tuple-storage-layout.html">

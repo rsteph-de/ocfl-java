@@ -1,6 +1,6 @@
 package io.ocfl.core.path.mapper;
 
-import io.ocfl.core.util.PercentEscaper;
+import io.ocfl.core.util.escape.PercentEscaper;
 
 /**
  * This class defines common {@link LogicalPathMapper} implementations.

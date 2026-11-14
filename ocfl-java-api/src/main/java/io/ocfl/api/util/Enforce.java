@@ -44,6 +44,12 @@ public final class Enforce {
         return object;
     }
 
+    public static void expressionTrue(boolean expression, String message) {
+        if (!expression) {
+            throw new OcflInputException(message);
+        }
+    }
+
     public static <T> T expressionTrue(boolean expression, T object, String message) {
         if (!expression) {
             throw new OcflInputException(message);
