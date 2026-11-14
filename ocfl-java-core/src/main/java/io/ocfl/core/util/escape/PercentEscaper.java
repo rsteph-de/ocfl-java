@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package io.ocfl.core.util;
+package io.ocfl.core.util.escape;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

@@ -1,7 +1,7 @@
 package io.ocfl.core.path.mapper;
 
 import io.ocfl.api.util.Enforce;
-import io.ocfl.core.util.PercentEscaper;
+import io.ocfl.core.util.escape.PercentEscaper;
 
 /**
  * A {@link LogicalPathMapper} that percent-encodes specific characters in logical paths to produce safe content paths.
