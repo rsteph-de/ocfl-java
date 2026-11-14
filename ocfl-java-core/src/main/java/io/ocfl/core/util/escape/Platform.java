@@ -37,8 +37,6 @@
 
 package io.ocfl.core.util.escape;
 
-import com.google.common.annotations.GwtCompatible;
-
 /**
  * NOTICE: This class was copied from Guava 28.2-jre to compile the modified PercentEscaper
  * and reduce dependencies.
@@ -47,7 +45,6 @@ import com.google.common.annotations.GwtCompatible;
  *
  * @author Jesse Wilson
  */
-@GwtCompatible(emulated = true)
 final class Platform {
   private Platform() {}
 

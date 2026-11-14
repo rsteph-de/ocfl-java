@@ -36,11 +36,6 @@
  */
 
 package io.ocfl.core.util.escape;
-
-import com.google.common.annotations.GwtCompatible;
-import com.google.common.base.Function;
-import com.google.errorprone.annotations.DoNotMock;
-
 /**
  * NOTICE: This class is copied from Guava 28.2-jre to compile the modified PercentEscaper
  * and reduce dependencies.
@@ -66,24 +61,23 @@ import com.google.errorprone.annotations.DoNotMock;
  * Character#isHighSurrogate surrogate} {@linkplain Character#isLowSurrogate pairs}, or by starting
  * with short strings already known to be free of unpaired surrogates.
  *
- * <p>The two primary implementations of this interface are {@link CharEscaper} and {@link
+ * <p>The two primary implementations of this interface are {@code CharEscaper} and {@code
  * UnicodeEscaper}. They are heavily optimized for performance and greatly simplify the task of
  * implementing new escapers. It is strongly recommended that when implementing a new escaper you
  * extend one of these classes. If you find that you are unable to achieve the desired behavior
  * using either of these classes, please contact the Java libraries team for advice.
  *
- * <p>Popular escapers are defined as constants in classes like {@link
- * com.google.common.html.HtmlEscapers} and {@link com.google.common.xml.XmlEscapers}. To create
- * your own escapers, use {@link CharEscaperBuilder}, or extend {@code CharEscaper} or {@code
- * UnicodeEscaper}.
+ * <p>Popular escapers are defined as constants in classes like {@code HtmlEscapers} and 
+ * {@code XmlEscapers}. To create your own escapers, use {@code CharEscaperBuilder}, 
+ * or extend {@code CharEscaper} or {@code UnicodeEscaper}.
  *
  * @author David Beaumont
  * @since 15.0
  */
-@DoNotMock("Use Escapers.nullEscaper() or another methods from the *Escapers classes")
-@GwtCompatible
+
+
 public abstract class Escaper {
-  // TODO(dbeaumont): evaluate custom implementations, considering package private constructor.
+  //@DoNotMock("Use Escapers.nullEscaper() or another methods from the *Escapers classes")
   /** Constructor for use by subclasses. */
   protected Escaper() {}
 
@@ -97,7 +91,7 @@ public abstract class Escaper {
    *   <li>{@link UnicodeEscaper} handles <a href="http://en.wikipedia.org/wiki/UTF-16">UTF-16</a>
    *       correctly, including surrogate character pairs. If the input is badly formed the escaper
    *       should throw {@link IllegalArgumentException}.
-   *   <li>{@link CharEscaper} handles Java characters independently and does not verify the input
+   *   <li>{@code CharEscaper} handles Java characters independently and does not verify the input
    *       for well formed characters. A {@code CharEscaper} should not be used in situations where
    *       input is not guaranteed to be restricted to the Basic Multilingual Plane (BMP).
    * </ul>
@@ -110,16 +104,4 @@ public abstract class Escaper {
    */
   public abstract String escape(String string);
 
-  private final Function<String, String> asFunction =
-      new Function<String, String>() {
-        @Override
-        public String apply(String from) {
-          return escape(from);
-        }
-      };
-
-  /** Returns a {@link Function} that invokes {@link #escape(String)} on this escaper. */
-  public final Function<String, String> asFunction() {
-    return asFunction;
-  }
 }
