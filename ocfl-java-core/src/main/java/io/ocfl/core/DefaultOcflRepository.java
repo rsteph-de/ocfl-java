@@ -262,8 +262,8 @@ public class DefaultOcflRepository implements OcflRepository {
         var versionNum = requireVersion(objectVersionId, inventory);
 
         var versionDetails = createVersionDetails(inventory, versionNum);
+        /*
         var objectStreams = storage.getObjectStreams(inventory, versionNum);
-
         var files = versionDetails.getFiles().stream()
                 .map(file -> {
                     return new OcflObjectVersionFile(file, objectStreams.get(file.getPath()));
@@ -271,8 +271,9 @@ public class DefaultOcflRepository implements OcflRepository {
                 .collect(Collectors.toMap(OcflObjectVersionFile::getPath, v -> v));
 
         versionDetails.setFileMap(null);
+        */
 
-        return new OcflObjectVersion(versionDetails, files);
+        return new OcflObjectVersion(versionDetails);
     }
 
     /**
@@ -929,5 +930,41 @@ public class DefaultOcflRepository implements OcflRepository {
      */
     public void setClock(Clock clock) {
         this.clock = Enforce.notNull(clock, "clock cannot be null");
+    }
+
+    @Override
+    public OcflObjectVersionFile getFile(ObjectVersionId objectVersionId, String filePath) {
+        var inventory = requireInventory(objectVersionId);
+        var versionNum = requireVersion(objectVersionId, inventory);
+        var version = inventory.ensureVersion(versionNum);
+        
+        var fileDetails = responseMapper.fileDetails(inventory, version, filePath);
+        var srcFile = storage.getObjectStream(inventory, versionNum, filePath);
+        
+        return new OcflObjectVersionFile(fileDetails, srcFile);
+    }
+
+    @Override
+    public boolean containsFile(ObjectVersionId objectVersionId, String filePath) {
+        var inventory = requireInventory(objectVersionId);
+        var versionNum = requireVersion(objectVersionId, inventory);
+        var version = inventory.ensureVersion(versionNum);
+        return version.containsPath(filePath);
+    }
+    
+    @Override
+    public int countFiles(ObjectVersionId objectVersionId) {
+        var inventory = requireInventory(objectVersionId);
+        var versionNum = requireVersion(objectVersionId, inventory);
+        var version = inventory.ensureVersion(versionNum);
+        return version.countFiles();
+    }
+    
+    @Override
+    public Set<String> listFiles(ObjectVersionId objectVersionId) {
+        var inventory = requireInventory(objectVersionId);
+        var versionNum = requireVersion(objectVersionId, inventory);
+        var version = inventory.ensureVersion(versionNum);
+        return version.getAllPaths();
     }
 }

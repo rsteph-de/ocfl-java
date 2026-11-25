@@ -482,8 +482,8 @@ public abstract class MutableHeadITest {
         var desc = repo.describeObject(objectId);
 
         assertEquals("v2", desc.getHeadVersionNum().toString());
-        assertTrue(desc.getHeadVersion().containsFile("file4.txt"));
-        assertFalse(desc.getHeadVersion().containsFile("file3.txt"));
+        assertTrue(repo.containsFile(ObjectVersionId.head(objectId), "file4.txt"));
+        assertFalse(repo.containsFile(ObjectVersionId.head(objectId), "file3.txt"));
     }
 
     @Test
@@ -534,8 +534,8 @@ public abstract class MutableHeadITest {
         var desc = repo.describeObject(objectId);
 
         assertEquals("v2", desc.getHeadVersionNum().toString());
-        assertTrue(desc.getHeadVersion().containsFile("file4.txt"));
-        assertFalse(desc.getHeadVersion().containsFile("file3.txt"));
+        assertTrue(repo.containsFile(ObjectVersionId.head(objectId), "file4.txt"));
+        assertFalse(repo.containsFile(ObjectVersionId.head(objectId), "file3.txt"));
     }
 
     @Test

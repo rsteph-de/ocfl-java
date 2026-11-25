@@ -178,8 +178,7 @@ public class OcflS3Test {
 
         assertEquals(
                 "file1",
-                streamToString(repo.getObject(ObjectVersionId.head(objectId))
-                        .getFile("dir/file1.txt")
+                streamToString(repo.getFile(ObjectVersionId.head(objectId), "dir/file1.txt")
                         .getStream()));
 
         repo.commitStagedChanges(objectId, versionInfo("commit", "Peter", "winckles@wisc.edu"));
@@ -200,8 +199,7 @@ public class OcflS3Test {
 
         assertEquals(
                 "file2",
-                streamToString(repo.getObject(ObjectVersionId.head(objectId))
-                        .getFile("dir/sub/file2.txt")
+                streamToString(repo.getFile(ObjectVersionId.head(objectId), "dir/sub/file2.txt")
                         .getStream()));
     }
 

@@ -128,6 +128,16 @@ public class ObjectDetailsDbOcflStorage extends AbstractOcflStorage {
 
         return delegate.getObjectStreams(inventory, versionNum);
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OcflFileRetriever getObjectStream(Inventory inventory, VersionNum versionNum, String filePath) {
+        ensureOpen();
+        
+        return delegate.getObjectStream(inventory, versionNum, filePath);
+    }
 
     /**
      * {@inheritDoc}
