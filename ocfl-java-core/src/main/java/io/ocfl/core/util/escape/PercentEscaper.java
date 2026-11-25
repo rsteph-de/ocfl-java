@@ -22,17 +22,12 @@
  * THE SOFTWARE.
  */
 
-package io.ocfl.core.util;
+package io.ocfl.core.util.escape;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.annotations.Beta;
-import com.google.common.annotations.GwtCompatible;
-import com.google.common.escape.UnicodeEscaper;
-import com.google.common.net.UrlEscapers;
 import java.util.HashSet;
 import java.util.Set;
+
+import io.ocfl.api.util.Enforce;
 
 /**
  * NOTICE: This class is copied from Guava 28.2-jre and modified to support lowercase hex encoding and either encoding
@@ -42,7 +37,7 @@ import java.util.Set;
  * encoding scheme. The set of safe characters (those which remain unescaped) can be specified on
  * construction.
  *
- * <p>This class is primarily used for creating URI escapers in {@link UrlEscapers} but can be used
+ * <p>This class is primarily used for creating URI escapers in {@code UrlEscapers} but can be used
  * directly if required. While URI escapers impose specific semantics on which characters are
  * considered 'safe', this class has a minimal set of restrictions.
  *
@@ -66,8 +61,6 @@ import java.util.Set;
  * @author David Beaumont
  * @since 15.0
  */
-@Beta
-@GwtCompatible
 public final class PercentEscaper extends UnicodeEscaper {
 
     // In some escapers spaces are escaped to '+'
@@ -135,7 +128,7 @@ public final class PercentEscaper extends UnicodeEscaper {
         }
 
         private static void addRangeToSet(char start, char end, Set<Character> charSet) {
-            checkArgument(start < end, "The start char must come before the end char.");
+            Enforce.expressionTrue(start < end, "The start char must come before the end char.");
             for (var c = start; c <= end; c++) {
                 charSet.add(c);
             }
@@ -251,9 +244,9 @@ public final class PercentEscaper extends UnicodeEscaper {
      * @throws IllegalArgumentException if any of the parameters were invalid
      */
     private PercentEscaper(Behavior behavior, Set<Character> charSet, boolean plusForSpace, boolean useUppercase) {
-        checkNotNull(charSet); // eager for GWT.
+        Enforce.notNull(charSet, "charset cannot be null"); // eager for GWT.
 
-        this.behavior = checkNotNull(behavior);
+        this.behavior = Enforce.notNull(behavior, "behavior cannot be null");
         this.plusForSpace = plusForSpace;
 
         var charSetCopy = new HashSet<>(charSet);
@@ -299,11 +292,11 @@ public final class PercentEscaper extends UnicodeEscaper {
 
     /*
      * Overridden for performance. For unescaped strings this improved the performance of the uri
-     * escaper from ~760ns to ~400ns as measured by {@link CharEscapersBenchmark}.
+     * escaper from ~760ns to ~400ns as measured by {@code CharEscapersBenchmark}.
      */
     @Override
     protected int nextEscapeIndex(CharSequence csq, int index, int end) {
-        checkNotNull(csq);
+        Enforce.notNull(csq, "char sequence cannot be null");
         for (; index < end; index++) {
             char c = csq.charAt(index);
             if (shouldEscapeChar(c)) {
@@ -315,11 +308,11 @@ public final class PercentEscaper extends UnicodeEscaper {
 
     /*
      * Overridden for performance. For unescaped strings this improved the performance of the uri
-     * escaper from ~400ns to ~170ns as measured by {@link CharEscapersBenchmark}.
+     * escaper from ~400ns to ~170ns as measured by {@code CharEscapersBenchmark}.
      */
     @Override
     public String escape(String s) {
-        checkNotNull(s);
+        Enforce.notNull(s, "string cannot be null");
         int slen = s.length();
         for (int index = 0; index < slen; index++) {
             char c = s.charAt(index);
