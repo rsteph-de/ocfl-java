@@ -50,14 +50,14 @@ public class ResponseMapper {
 
     public ObjectDetails mapInventory(Inventory inventory) {
         var details = new ObjectDetails()
-                .setId(inventory.getId())
-                .setDigestAlgorithm(inventory.getDigestAlgorithm())
-                .setObjectOcflVersion(inventory.getType().getOcflVersion())
-                .setHeadVersionNum(inventory.getHead());
+            .setId(inventory.getId())
+            .setDigestAlgorithm(inventory.getDigestAlgorithm())
+            .setObjectOcflVersion(inventory.getType().getOcflVersion())
+            .setHeadVersionNum(inventory.getHead());
 
         var versionMap = inventory.getVersions().entrySet().stream()
-                .map(entry -> mapVersion(inventory, entry.getKey(), entry.getValue()))
-                .collect(Collectors.toMap(VersionDetails::getVersionNum, Function.identity()));
+            .map(entry -> mapVersion(inventory, entry.getKey(), entry.getValue()))
+            .collect(Collectors.toMap(VersionDetails::getVersionNum, Function.identity()));
 
         details.setVersions(versionMap);
 
@@ -66,12 +66,11 @@ public class ResponseMapper {
 
     public VersionDetails mapVersion(Inventory inventory, VersionNum versionNum, Version version) {
         return new VersionDetails()
-                .setObjectVersionId(ObjectVersionId.version(inventory.getId(), versionNum))
-                .setObjectOcflVersion(inventory.getType().getOcflVersion())
-                .setCreated(version.getCreated())
-                .setMutable(inventory.hasMutableHead() && inventory.getHead().equals(versionNum))
-                .setFileMap(mapFileDetails(inventory, version))
-                .setVersionInfo(versionInfo(version));
+            .setObjectVersionId(ObjectVersionId.version(inventory.getId(), versionNum))
+            .setObjectOcflVersion(inventory.getType().getOcflVersion())
+            .setCreated(version.getCreated())
+            .setMutable(inventory.hasMutableHead() && inventory.getHead().equals(versionNum))
+            .setVersionInfo(versionInfo(version));
     }
 
     public FileChangeHistory fileChangeHistory(Inventory inventory, String logicalPath) {
@@ -91,29 +90,29 @@ public class ResponseMapper {
                 fixity.put(inventory.getDigestAlgorithm(), fileId);
 
                 changes.add(new FileChange()
-                        .setChangeType(FileChangeType.UPDATE)
-                        .setObjectVersionId(ObjectVersionId.version(inventory.getId(), versionNum))
-                        .setPath(logicalPath)
-                        .setTimestamp(version.getCreated())
-                        .setVersionInfo(versionInfo(version))
-                        .setStorageRelativePath(inventory.storagePath(fileId))
-                        .setFixity(fixity));
+                    .setChangeType(FileChangeType.UPDATE)
+                    .setObjectVersionId(ObjectVersionId.version(inventory.getId(), versionNum))
+                    .setPath(logicalPath)
+                    .setTimestamp(version.getCreated())
+                    .setVersionInfo(versionInfo(version))
+                    .setStorageRelativePath(inventory.storagePath(fileId))
+                    .setFixity(fixity));
             } else if (fileId == null && lastFileId != null) {
                 lastFileId = null;
                 changes.add(new FileChange()
-                        .setChangeType(FileChangeType.REMOVE)
-                        .setObjectVersionId(ObjectVersionId.version(inventory.getId(), versionNum))
-                        .setPath(logicalPath)
-                        .setTimestamp(version.getCreated())
-                        .setVersionInfo(versionInfo(version))
-                        .setFixity(Collections.emptyMap()));
+                    .setChangeType(FileChangeType.REMOVE)
+                    .setObjectVersionId(ObjectVersionId.version(inventory.getId(), versionNum))
+                    .setPath(logicalPath)
+                    .setTimestamp(version.getCreated())
+                    .setVersionInfo(versionInfo(version))
+                    .setFixity(Collections.emptyMap()));
             }
         }
 
         return new FileChangeHistory().setPath(logicalPath).setFileChanges(changes);
     }
 
-    private Map<String, FileDetails> mapFileDetails(Inventory inventory, Version version) {
+    public Map<String, FileDetails> mapFileDetails(Inventory inventory, Version version) {
         var fileDetailsMap = new HashMap<String, FileDetails>();
 
         var digestAlgorithm = inventory.getDigestAlgorithm();
@@ -122,9 +121,9 @@ public class ResponseMapper {
             paths.forEach(path -> {
                 var contentPath = inventory.getContentPath(digest);
                 var details = new FileDetails()
-                        .setPath(path)
-                        .setStorageRelativePath(inventory.storagePath(digest))
-                        .addDigest(digestAlgorithm, digest);
+                    .setPath(path)
+                    .setStorageRelativePath(inventory.storagePath(digest))
+                    .addDigest(digestAlgorithm, digest);
 
                 var digests = inventory.getFixityForContentPath(contentPath);
                 digests.forEach(details::addDigest);
@@ -133,6 +132,21 @@ public class ResponseMapper {
         });
 
         return fileDetailsMap;
+    }
+
+    public FileDetails fileDetails(Inventory inventory, Version version, String filePath) {
+        String digest = version.getFileId(filePath);
+        var contentPath = inventory.getContentPath(digest);
+
+        var details = new FileDetails()
+            .setPath(filePath)
+            .setStorageRelativePath(inventory.storagePath(digest))
+            .addDigest(inventory.getDigestAlgorithm(), digest);
+
+        var digests = inventory.getFixityForContentPath(contentPath);
+        digests.forEach(details::addDigest);
+
+        return details;
     }
 
     private VersionInfo versionInfo(Version version) {

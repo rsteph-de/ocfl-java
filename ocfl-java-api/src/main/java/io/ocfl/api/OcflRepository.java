@@ -24,6 +24,11 @@
 
 package io.ocfl.api;
 
+import java.nio.file.Path;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
 import io.ocfl.api.exception.AlreadyExistsException;
 import io.ocfl.api.exception.NotFoundException;
 import io.ocfl.api.exception.ObjectOutOfSyncException;
@@ -33,12 +38,10 @@ import io.ocfl.api.model.FileChangeHistory;
 import io.ocfl.api.model.ObjectDetails;
 import io.ocfl.api.model.ObjectVersionId;
 import io.ocfl.api.model.OcflObjectVersion;
+import io.ocfl.api.model.OcflObjectVersionFile;
 import io.ocfl.api.model.ValidationResults;
 import io.ocfl.api.model.VersionDetails;
 import io.ocfl.api.model.VersionInfo;
-import java.nio.file.Path;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 /**
  * Interface for interacting with an OCFL repository.
@@ -111,6 +114,14 @@ public interface OcflRepository {
      * @throws NotFoundException when no object can be found for the specified objectVersionId
      */
     OcflObjectVersion getObject(ObjectVersionId objectVersionId);
+    
+    OcflObjectVersionFile getFile(ObjectVersionId objectVersionId, String filePath);
+    
+    boolean containsFile(ObjectVersionId objectVersionId, String filePath);
+    
+    int countFiles(ObjectVersionId objectVersionId);
+    
+    Set<String> listFiles(ObjectVersionId objectVersionId);
 
     /**
      * Returns all of the details about an object and all of its versions.

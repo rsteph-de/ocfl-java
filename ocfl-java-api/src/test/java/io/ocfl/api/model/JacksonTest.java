@@ -36,12 +36,7 @@ public class JacksonTest {
                                         .setUser("me", "mailto:me@example.com")
                                         .setMessage("commit")
                                         .setCreated(OffsetDateTime.now(ZoneOffset.UTC)))
-                                .setFileMap(Map.of(
-                                        "file.txt",
-                                        new FileDetails()
-                                                .setPath("file.txt")
-                                                .setStorageRelativePath("object/file.txt")
-                                                .setFixity(Map.of(DigestAlgorithmRegistry.sha512, "abc123"))))));
+                               ));
 
         var json = objectMapper.writeValueAsString(original);
 

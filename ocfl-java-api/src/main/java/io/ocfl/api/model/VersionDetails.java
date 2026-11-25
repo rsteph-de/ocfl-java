@@ -24,12 +24,10 @@
 
 package io.ocfl.api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Details about a specific version of an object
@@ -41,10 +39,8 @@ public class VersionDetails {
     private OffsetDateTime created;
     private VersionInfo versionInfo;
     private boolean mutable;
-    private Map<String, FileDetails> fileMap;
 
     public VersionDetails() {
-        fileMap = new HashMap<>();
     }
 
     /**
@@ -135,50 +131,6 @@ public class VersionDetails {
         return this;
     }
 
-    /**
-     * Collection of all of the files in this version of the object
-     *
-     * @return all of the files in the version
-     */
-    @JsonIgnore
-    public Collection<FileDetails> getFiles() {
-        return fileMap.values();
-    }
-
-    /**
-     * Returns true if the version contains a file at the specified path
-     *
-     * @param path logical path to an object file
-     * @return true if the version contains the file
-     */
-    public boolean containsFile(String path) {
-        return fileMap.containsKey(path);
-    }
-
-    /**
-     * Returns the FileDetails for the file at the given path or null if it does not exist
-     *
-     * @param path logical path to the file
-     * @return FileDetails or null
-     */
-    public FileDetails getFile(String path) {
-        return fileMap.get(path);
-    }
-
-    public VersionDetails setFileMap(Map<String, FileDetails> fileMap) {
-        this.fileMap = fileMap;
-        return this;
-    }
-
-    /**
-     * Returns a map of logical paths to file details that represents the state of the object at this version.
-     *
-     * @return file state map
-     */
-    public Map<String, FileDetails> getFileMap() {
-        return fileMap;
-    }
-
     @Override
     public String toString() {
         return "VersionDetails{" + "objectVersionId="
@@ -186,8 +138,7 @@ public class VersionDetails {
                 + objectOcflVersion + ", created="
                 + created + ", versionInfo="
                 + versionInfo + ", mutable="
-                + mutable + ", fileMap="
-                + fileMap + '}';
+                + mutable + '}';
     }
 
     @Override
@@ -203,12 +154,11 @@ public class VersionDetails {
                 && Objects.equals(objectVersionId, that.objectVersionId)
                 && objectOcflVersion == that.objectOcflVersion
                 && Objects.equals(created, that.created)
-                && Objects.equals(versionInfo, that.versionInfo)
-                && Objects.equals(fileMap, that.fileMap);
+                && Objects.equals(versionInfo, that.versionInfo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(objectVersionId, objectOcflVersion, created, versionInfo, mutable, fileMap);
+        return Objects.hash(objectVersionId, objectOcflVersion, created, versionInfo, mutable);
     }
 }

@@ -165,28 +165,27 @@ public abstract class OcflITest {
         var inputStream3 = new DigestInputStream(
                 ITestHelper.streamString(file3Contents), DigestAlgorithmRegistry.sha512.getMessageDigest());
 
-        repo.updateObject(ObjectVersionId.head(objectId), new VersionInfo(), updater -> {
+        ObjectVersionId vHead = ObjectVersionId.head(objectId);
+        repo.updateObject(vHead, new VersionInfo(), updater -> {
             updater.writeFile(inputStream1, "file1");
             updater.writeFile(inputStream2, "file2");
             updater.writeFile(inputStream3, "file3");
         });
 
-        var object = repo.getObject(ObjectVersionId.head(objectId));
-
-        try (var stream = object.getFile("file1").getStream()) {
+        try (var stream = repo.getFile(vHead, "file1").getStream()) {
             assertEquals(file1Contents, new String(stream.readAllBytes()));
         }
-        assertEquals(file1Sha512, object.getFile("file1").getFixity().get(DigestAlgorithmRegistry.sha512));
+        assertEquals(file1Sha512, repo.getFile(vHead, "file1").getFixity().get(DigestAlgorithmRegistry.sha512));
 
-        try (var stream = object.getFile("file2").getStream()) {
+        try (var stream = repo.getFile(vHead, "file2").getStream()) {
             assertEquals(file2Contents, new String(stream.readAllBytes()));
         }
-        assertEquals(file2Sha512, object.getFile("file2").getFixity().get(DigestAlgorithmRegistry.sha512));
+        assertEquals(file2Sha512, repo.getFile(vHead, "file2").getFixity().get(DigestAlgorithmRegistry.sha512));
 
-        try (var stream = object.getFile("file3").getStream()) {
+        try (var stream = repo.getFile(vHead, "file3").getStream()) {
             assertEquals(file3Contents, new String(stream.readAllBytes()));
         }
-        assertEquals(file3Sha512, object.getFile("file3").getFixity().get(DigestAlgorithmRegistry.sha512));
+        assertEquals(file3Sha512, repo.getFile(vHead, "file3").getFixity().get(DigestAlgorithmRegistry.sha512));
     }
 
     @Test
@@ -329,27 +328,27 @@ public abstract class OcflITest {
         var sourcePathV2 = ITestHelper.sourceObjectPath(objectId, "v2");
         var sourcePathV3 = ITestHelper.sourceObjectPath(objectId, "v3");
 
-        repo.putObject(ObjectVersionId.head(objectId), sourcePathV1, defaultVersionInfo);
-        repo.putObject(ObjectVersionId.head(objectId), sourcePathV2, defaultVersionInfo.setMessage("second"));
-        repo.putObject(ObjectVersionId.head(objectId), sourcePathV3, defaultVersionInfo.setMessage("third"));
+        ObjectVersionId vHead = ObjectVersionId.head(objectId);
+        repo.putObject(vHead, sourcePathV1, defaultVersionInfo);
+        repo.putObject(vHead, sourcePathV2, defaultVersionInfo.setMessage("second"));
+        repo.putObject(vHead, sourcePathV3, defaultVersionInfo.setMessage("third"));
 
         verifyRepo(repoName);
 
-        var files = repo.getObject(ObjectVersionId.head(objectId));
-        assertEquals(2, files.getFiles().size());
-        verifyStream(sourcePathV3.resolve("file2"), files.getFile("file2"));
-        verifyStream(sourcePathV3.resolve("file4"), files.getFile("file4"));
+        assertEquals(2, repo.countFiles(vHead));
+        verifyStream(sourcePathV3.resolve("file2"), repo.getFile(vHead, "file2"));
+        verifyStream(sourcePathV3.resolve("file4"), repo.getFile(vHead, "file4"));
 
-        files = repo.getObject(ObjectVersionId.version(objectId, "v2"));
-        assertEquals(3, files.getFiles().size());
-        verifyStream(sourcePathV2.resolve("file1"), files.getFile("file1"));
-        verifyStream(sourcePathV2.resolve("file2"), files.getFile("file2"));
-        verifyStream(sourcePathV2.resolve("dir1/file3"), files.getFile("dir1/file3"));
+        ObjectVersionId v2 = ObjectVersionId.version(objectId, "v2");
+        assertEquals(3, repo.countFiles(v2));
+        verifyStream(sourcePathV2.resolve("file1"), repo.getFile(v2, "file1"));
+        verifyStream(sourcePathV2.resolve("file2"), repo.getFile(v2, "file2"));
+        verifyStream(sourcePathV2.resolve("dir1/file3"), repo.getFile(v2, "dir1/file3"));
 
-        files = repo.getObject(ObjectVersionId.version(objectId, "v1"));
-        assertEquals(2, files.getFiles().size());
-        verifyStream(sourcePathV1.resolve("file1"), files.getFile("file1"));
-        verifyStream(sourcePathV1.resolve("file2"), files.getFile("file2"));
+        ObjectVersionId v1 = ObjectVersionId.version(objectId, "v1");
+        assertEquals(2, repo.countFiles(v1));
+        verifyStream(sourcePathV1.resolve("file1"), repo.getFile(v1, "file1"));
+        verifyStream(sourcePathV1.resolve("file2"), repo.getFile(v1, "file2"));
     }
 
     @Test
@@ -897,8 +896,7 @@ public abstract class OcflITest {
 
         repo.putObject(ObjectVersionId.head(objectId), empty, defaultVersionInfo);
 
-        assertEquals(
-                0, repo.getObject(ObjectVersionId.head(objectId)).getFiles().size());
+        assertEquals(0, repo.countFiles(ObjectVersionId.head(objectId)));
     }
 
     @Test
@@ -911,11 +909,9 @@ public abstract class OcflITest {
         repo.putObject(
                 ObjectVersionId.head(objectId), ITestHelper.sourceObjectPath(objectId, "v1"), defaultVersionInfo);
 
-        var ocflObject = repo.getObject(ObjectVersionId.head(objectId));
-
-        repo.updateObject(ocflObject.getObjectVersionId(), defaultVersionInfo.setMessage("delete content"), updater -> {
-            ocflObject.getFiles().forEach(file -> {
-                updater.removeFile(file.getPath());
+        repo.updateObject(ObjectVersionId.head(objectId), defaultVersionInfo.setMessage("delete content"), updater -> {
+            repo.listFiles(ObjectVersionId.head(objectId)).forEach(file -> {
+                updater.removeFile(file);
             });
         });
 
@@ -1074,8 +1070,7 @@ public abstract class OcflITest {
         var repo = existingRepo(repoName, repoDir);
 
         assertThrows(PathConstraintException.class, () -> {
-            try (var stream = repo.getObject(ObjectVersionId.head("urn:example:bad"))
-                    .getFile("file.txt")
+            try (var stream = repo.getFile(ObjectVersionId.head("urn:example:bad"), "file.txt")
                     .getStream()) {
                 IOUtils.toString(stream, StandardCharsets.UTF_8);
                 fail("Should not have read file");
@@ -1503,11 +1498,8 @@ public abstract class OcflITest {
         repo.updateObject(ObjectVersionId.head(objectId), defaultVersionInfo, updater -> {
             updater.addPath(sourcePathV1.resolve("file1"));
         });
-
-        var files = repo.describeVersion(ObjectVersionId.head(objectId)).getFiles();
-
-        assertEquals(1, files.size());
-        assertEquals("file1", files.iterator().next().getPath());
+        assertEquals(1, repo.countFiles(ObjectVersionId.head(objectId)));
+        assertTrue(repo.containsFile(ObjectVersionId.head(objectId), "file1"));
     }
 
     @Test
@@ -2246,8 +2238,8 @@ public abstract class OcflITest {
         var desc = repo.describeObject(objectId);
 
         assertEquals("v2", desc.getHeadVersionNum().toString());
-        assertTrue(desc.getHeadVersion().containsFile("file4.txt"));
-        assertFalse(desc.getHeadVersion().containsFile("file3.txt"));
+        assertTrue(repo.containsFile(ObjectVersionId.head(objectId), "file4.txt"));
+        assertFalse(repo.containsFile(ObjectVersionId.head(objectId), "file3.txt"));
     }
 
     @Test
@@ -2393,7 +2385,7 @@ public abstract class OcflITest {
                     "");
         });
 
-        var file = repo.getObject(ObjectVersionId.head(objectId)).getFile("file1");
+        var file = repo.getFile(ObjectVersionId.head(objectId), "file1");
         assertNotNull(file);
         assertStream("Test file 1", file);
 
@@ -2406,7 +2398,7 @@ public abstract class OcflITest {
                     OcflOption.OVERWRITE);
         });
 
-        file = repo.getObject(ObjectVersionId.head(objectId)).getFile("file1");
+        file = repo.getFile(ObjectVersionId.head(objectId), "file1");
         assertStream("Test file 2", file);
     }
 
@@ -2425,7 +2417,7 @@ public abstract class OcflITest {
                     "");
         });
 
-        var file = repo.getObject(ObjectVersionId.head(objectId)).getFile("file1");
+        var file = repo.getFile(ObjectVersionId.head(objectId), "file1");
         assertNotNull(file);
         OcflAsserts.assertThrowsWithMessage(FixityCheckException.class, "Expected sha-512 digest", () -> {
             assertStream("Test file 1", file);
@@ -2790,14 +2782,12 @@ public abstract class OcflITest {
 
         assertEquals(
                 "5",
-                repo.getObject(ObjectVersionId.head(objectId))
-                        .getFile("file1")
+                repo.getFile(ObjectVersionId.head(objectId), "file1")
                         .getFixity()
                         .get(DigestAlgorithmRegistry.size));
         assertEquals(
                 String.valueOf(fileSize),
-                repo.getObject(ObjectVersionId.head(objectId))
-                        .getFile("file2")
+                repo.getFile(ObjectVersionId.head(objectId), "file2")
                         .getFixity()
                         .get(DigestAlgorithmRegistry.size));
 
@@ -2843,7 +2833,7 @@ public abstract class OcflITest {
             updater.writeFile(ITestHelper.streamString("asdf".repeat(99_999)), "file1");
         });
 
-        var file1 = repo.getObject(ObjectVersionId.head(objectId)).getFile("file1");
+        var file1 = repo.getFile(ObjectVersionId.head(objectId), "file1");
 
         try (var is = file1.getRange(0L, 3L)) {
             var value = IOUtils.toString(is, StandardCharsets.UTF_8);

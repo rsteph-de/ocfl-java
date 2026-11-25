@@ -280,6 +280,23 @@ public class DefaultOcflStorage extends AbstractOcflStorage {
 
         return map;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OcflFileRetriever getObjectStream(Inventory inventory, VersionNum versionNum, String filePath) {
+        ensureOpen();
+
+        LOG.debug("Get file streams for object <{}> version <{}>", inventory.getId(), versionNum);
+
+        var version = inventory.ensureVersion(versionNum);
+        var algorithm = inventory.getDigestAlgorithm();
+
+        var digest = version.getFileId(filePath); 
+        var srcPath = inventory.storagePath(digest);
+        return storage.readLazy(srcPath, algorithm, digest);
+    }
 
     /**
      * {@inheritDoc}

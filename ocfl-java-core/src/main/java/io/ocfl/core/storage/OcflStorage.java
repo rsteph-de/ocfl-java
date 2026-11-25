@@ -118,6 +118,8 @@ public interface OcflStorage {
      * @return a map of {@code OcflFileRetriever} objects keyed off the object relative file paths of all of the files in the object
      */
     Map<String, OcflFileRetriever> getObjectStreams(Inventory inventory, VersionNum versionNum);
+    
+    OcflFileRetriever getObjectStream(Inventory inventory, VersionNum versionNum, String filePath);
 
     /**
      * Reconstructs a complete object at the specified version in the stagingDir.

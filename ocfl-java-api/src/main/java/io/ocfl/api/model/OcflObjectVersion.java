@@ -26,8 +26,6 @@ package io.ocfl.api.model;
 
 import io.ocfl.api.util.Enforce;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * View of a specific version of an OCFL object that allows its files to be lazy-loaded.
@@ -35,11 +33,9 @@ import java.util.Map;
 public class OcflObjectVersion {
 
     private final VersionDetails versionDetails;
-    private final Map<String, OcflObjectVersionFile> fileMap;
 
-    public OcflObjectVersion(VersionDetails versionDetails, Map<String, OcflObjectVersionFile> fileMap) {
+    public OcflObjectVersion(VersionDetails versionDetails) {
         this.versionDetails = Enforce.notNull(versionDetails, "versionDetails cannot be null");
-        this.fileMap = Enforce.notNull(fileMap, "fileMap cannot be null");
     }
 
     /**
@@ -96,37 +92,8 @@ public class OcflObjectVersion {
         return versionDetails.isMutable();
     }
 
-    /**
-     * Collection of all of the files in this version of the object
-     *
-     * @return all of the files in the version
-     */
-    public Collection<OcflObjectVersionFile> getFiles() {
-        return fileMap.values();
-    }
-
-    /**
-     * Returns true if the version contains a file at the specified path
-     *
-     * @param path logical path to an object file
-     * @return true if the version contains the file
-     */
-    public boolean containsFile(String path) {
-        return fileMap.containsKey(path);
-    }
-
-    /**
-     * Returns the OcflObjectVersionFile for the file at the given path or null if it does not exist
-     *
-     * @param path logical path to the file
-     * @return OcflObjectVersionFile or null if it does not exist
-     */
-    public OcflObjectVersionFile getFile(String path) {
-        return fileMap.get(path);
-    }
-
     @Override
     public String toString() {
-        return "OcflObjectVersion{" + "versionDetails='" + versionDetails + '\'' + ", fileMap=" + fileMap + '}';
+        return "OcflObjectVersion{" + "versionDetails='" + versionDetails + "'}";
     }
 }

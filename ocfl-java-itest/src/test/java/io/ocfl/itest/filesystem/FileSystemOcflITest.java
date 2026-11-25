@@ -56,17 +56,16 @@ public class FileSystemOcflITest extends OcflITest {
 
         var logicalPath = "tést/<bad>:Path 1/\\|obj/?8*%id/#{something}/[0]/۞.txt";
 
-        repo.updateObject(ObjectVersionId.head("o1"), defaultVersionInfo.setMessage("1"), updater -> {
+        ObjectVersionId vO1 = ObjectVersionId.head("o1");
+        repo.updateObject(vO1, defaultVersionInfo.setMessage("1"), updater -> {
             updater.writeFile(new ByteArrayInputStream("1".getBytes()), logicalPath);
         });
 
         verifyRepo(repoName);
 
-        var object = repo.getObject(ObjectVersionId.head("o1"));
+        assertTrue(repo.containsFile(vO1, logicalPath), "expected object to contain logical path " + logicalPath);
 
-        assertTrue(object.containsFile(logicalPath), "expected object to contain logical path " + logicalPath);
-
-        try (var stream = object.getFile(logicalPath).getStream()) {
+        try (var stream = repo.getFile(vO1, logicalPath).getStream()) {
             assertEquals("1", new String(stream.readAllBytes()));
         }
     }

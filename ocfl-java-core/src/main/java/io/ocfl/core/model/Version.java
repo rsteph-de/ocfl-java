@@ -122,6 +122,29 @@ public class Version {
     public String getFileId(String path) {
         return stateBiMap.getFileId(path);
     }
+    
+    public boolean containsPath(String path) {
+        return stateBiMap.containsPath(path);
+    }
+    
+    public boolean containsFileId(String fileId) {
+        return stateBiMap.containsFileId(fileId);
+    }
+    
+    @JsonIgnore
+    public int countFiles() {
+        return stateBiMap.getFileIdToPaths().keySet().size();
+    }
+    
+    @JsonIgnore
+    public int countPaths() {
+        return stateBiMap.getPathToFileId().keySet().size();
+    }
+    
+    @JsonIgnore
+    public Set<String> getAllPaths() {
+        return stateBiMap.getPathToFileId().keySet();
+    }
 
     /**
      * Returns the logical paths associated with the given file id
